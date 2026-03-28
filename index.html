@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Solar System</title>
+
+  <!-- A-Frame MUST load before anything else -->
+  <script src="script/aframe.min.js"></script>
+
+ 
+   
+
+  <!-- Register custom component BEFORE <a-scene> is parsed -->
+  <script>
+    AFRAME.registerComponent('orbit', {
+      schema: {
+        radius: { type: 'number', default: 10 },
+        speed:  { type: 'number', default: 1  }
+      },
+      init: function () {
+        this.angle = Math.random() * Math.PI * 2;
+      },
+      tick: function (time, delta) {
+        var mul = window.SMUL && window.SMUL[this.el.id] !== undefined
+                  ? window.SMUL[this.el.id] : 1.0;
+        this.angle += (this.data.speed * mul * delta * 0.001);
+        var r = this.data.radius;
+        this.el.object3D.position.set(
+          Math.cos(this.angle) * r,
+          0,
+          Math.sin(this.angle) * r
+        );
+      }
+    });
+  </script>
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { overflow:hidden; background:#000; font-family:'Courier New',monospace; }
+
+    #ui {
+      position:fixed; top:14px; right:14px; z-index:9999;
+      background:rgba(0,4,18,0.82);
+      border:1px solid rgba(80,160,255,0.22);
+      border-radius:8px; padding:12px 14px;
+      color:#aaddff; font-size:10px; letter-spacing:1px;
+      max-height:90vh; overflow-y:auto;
+    }
+    #ui h3 { color:#ffdd88; font-size:11px; letter-spacing:3px; margin-bottom:10px; }
+    .row { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+    .row label { width:72px; color:#cce8ff; font-size:50px; }
+    .row input  { width:85px; accent-color:#44aaff; cursor:pointer; }
+
+    #hint {
+      position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+      color:rgba(180,210,255,0.4); font-size:10px; letter-spacing:2px;
+      pointer-events:none; z-index:9999;
+    }
+  </style>
+</head>
+<body>
+
+
+
+<!-- ═══════════════════════════════════════════════
+     A-FRAME SCENE
+═══════════════════════════════════════════════ -->
+<a-scene
+  background="color: #000000"
+  renderer="antialias:true; colorManagement:true;"
+  vr-mode-ui="enabled:false"
+  loading-screen="backgroundColor:black; dotsColor:#44aaff">
+
+  <!-- ASSETS -->
+  <a-assets timeout="60000">
+    <img id="tex-stars"   src="texture/2k_stars_milky_way.jpg"  crossorigin="anonymous"/>
+    <img id="tex-sun"     src="texture/2k_sun.jpg"              crossorigin="anonymous"/>
+    <img id="tex-mercury" src="texture/2k_mercury.jpg"          crossorigin="anonymous"/>
+    <img id="tex-venus"   src="texture/2k_venus_atmosphere.jpg" crossorigin="anonymous"/>
+    <img id="tex-earth"   src="texture/2k_earth_daymap.jpg"     crossorigin="anonymous"/>
+    <img id="tex-mars"    src="texture/2k_mars.jpg"             crossorigin="anonymous"/>
+    <img id="tex-jupiter" src="texture/2k_jupiter.jpg"          crossorigin="anonymous"/>
+    <img id="tex-saturn"  src="texture/2k_saturn.jpg"           crossorigin="anonymous"/>
+    <img id="tex-satring" src="texture/2k_saturn_ring_alpha.png" crossorigin="anonymous"/>
+    <img id="tex-uranus"  src="texture/2k_uranus.jpg"           crossorigin="anonymous"/>
+    <img id="tex-neptune" src="texture/2k_neptune.jpg"          crossorigin="anonymous"/>
+    <img id="tex-moon"    src="texture/2k_moon.jpg"             crossorigin="anonymous"/>
+  </a-assets>
+
+  <!-- STARFIELD SKY -->
+  <a-sky src="#tex-stars"></a-sky>
+
+  <!-- LIGHTING -->
+  <a-light type="ambient"  color="#223355" intensity="0.8"></a-light>
+  <a-light type="point"    color="#fff8cc" intensity="2.5" distance="900" position="0 0 0"></a-light>
+
+  <!-- ═══════ SUN ═══════ -->
+  <a-sphere
+    radius="6"
+    position="0 0 0"
+    material="src:#tex-sun; shader:flat; emissive:#ff7700; emissiveIntensity:0.5"
+    animation="property:rotation; to:0 360 0; loop:true; dur:25000; easing:linear">
+  </a-sphere>
+  <!-- Glow layers -->
+  <a-sphere radius="7.5"  position="0 0 0" material="color:#ff9900; opacity:0.10; transparent:true; shader:flat; side:back"></a-sphere>
+  <a-sphere radius="9.5"  position="0 0 0" material="color:#ff5500; opacity:0.05; transparent:true; shader:flat; side:back"></a-sphere>
+  <a-text   value="SUN"   position="0 -8.2 0" align="center" color="#ffdd88" width="20" material="shader:flat"></a-text>
+
+  <!-- ═══════ MERCURY  orbit=18 ═══════ -->
+  <a-torus radius="18" radius-tubular="0.05" segments-tubular="128" rotation="-90 0 0"
+    material="color:#334477; opacity:0.35; transparent:true; shader:flat"></a-torus>
+  <a-sphere id="mercury" orbit="radius:18; speed:1.59"
+    radius="0.9"
+    material="src:#tex-mercury; roughness:0.9"
+    animation="property:rotation; to:0 360 0; loop:true; dur:4000; easing:linear">
+    <a-text value="MERCURY" position="0 -1.5 0" align="center" color="#cce8ff" width="16" material="shader:flat"></a-text>
+  </a-sphere>
+
+  <!-- ═══════ VENUS  orbit=30 ═══════ -->
+  <a-torus radius="30" radius-tubular="0.05" segments-tubular="128" rotation="-90 0 0"
+    material="color:#334477; opacity:0.35; transparent:true; shader:flat"></a-torus>
+  <a-sphere id="venus" orbit="radius:30; speed:1.17"
+    radius="1.6"
+    material="src:#tex-venus; roughness:0.85"
+    animation="property:rotation; to:0 -360 0; loop:true; dur:20000; easing:linear">
+    <a-text value="VENUS" position="0 -2.3 0" align="center" color="#cce8ff" width="16" material="shader:flat"></a-text>
+  </a-sphere>
+
+  <!-- ═══════ EARTH  orbit=43 ═══════ -->
+  <a-torus radius="43" radius-tubular="0.05" segments-tubular="160" rotation="-90 0 0"
+    material="color:#334477; opacity:0.35; transparent:true; shader:flat"></a-torus>
+  <a-entity id="earth-group" orbit="radius:43; speed:0.90">
+    <a-sphere id="earth"
+      radius="1.7"
+      material="src:#tex-earth; roughness:0.8"
+      animation="property:rotation; to:0 360 0; loop:true; dur:8000; easing:linear">
+      <a-text value="EARTH" position="0 -2.5 0" align="center" color="#cce8ff" width="16" material="shader:flat"></a-text>
+      <!-- MOON orbiting Earth -->
+      <a-sphere id="moon" orbit="radius:3.8; speed:5.50"
+        radius="0.46"
+        material="src:#tex-moon; roughness:0.95"
+        animation="property:rotation; to:0 360 0; loop:true; dur:18000; easing:linear">
+        <a-text value="MOON" position="0 -0.9 0" align="center" color="#cce8ff" width="15" material="shader:flat"></a-text>
+      </a-sphere>
+    </a-sphere>
+  </a-entity>
+
+  <!-- ═══════ MARS  orbit=57 ═══════ -->
+  <a-torus radius="57" radius-tubular="0.05" segments-tubular="160" rotation="-90 0 0"
+    material="color:#334477; opacity:0.35; transparent:true; shader:flat"></a-torus>
+  <a-sphere id="mars" orbit="radius:57; speed:0.53"
+    radius="1.1"
+    material="src:#tex-mars; roughness:0.9"
+    animation="property:rotation; to:0 360 0; loop:true; dur:7000; easing:linear">
+    <a-text value="MARS" position="0 -1.8 0" align="center" color="#cce8ff" width="16" material="shader:flat"></a-text>
+  </a-sphere>
+
+  <!-- ═══════ JUPITER  orbit=80 ═══════ -->
+  <a-torus radius="80" radius-tubular="0.06" segments-tubular="180" rotation="-90 0 0"
+    material="color:#334477; opacity:0.35; transparent:true; shader:flat"></a-torus>
+  <a-sphere id="jupiter" orbit="radius:80; speed:0.30"
+    radius="4.5"
+    material="src:#tex-jupiter; roughness:0.7"
+    animation="property:rotation; to:0 360 0; loop:true; dur:3500; easing:linear">
+    <a-text value="JUPITER" position="0 -5.8 0" align="center" color="#cce8ff" width="20" material="shader:flat"></a-text>
+  </a-sphere>
+
+  <!-- ═══════ SATURN  orbit=107 ═══════ -->
+  <a-torus radius="107" radius-tubular="0.06" segments-tubular="200" rotation="-90 0 0"
+    material="color:#334477; opacity:0.35; transparent:true; shader:flat"></a-torus>
+  <a-entity id="saturn-group" orbit="radius:107; speed:0.18">
+    <a-sphere id="saturn"
+      radius="3.8"
+      material="src:#tex-saturn; roughness:0.75"
+      animation="property:rotation; to:0 360 0; loop:true; dur:4000; easing:linear">
+    </a-sphere>
+    <!-- Saturn rings: three flat tori to simulate ring system -->
+    <a-torus radius="5.5"  radius-tubular="0.2" segments-tubular="130" segments-radial="12"
+      rotation="-90 0 0" material="src:#tex-satring; transparent:true; opacity:0.75; side:double;
+      shader:flat"></a-torus>
+    <a-torus radius="7.0"  radius-tubular="0.2" segments-tubular="130" segments-radial="12"
+      rotation="-90 0 0" material="src:#tex-satring; transparent:true; opacity:0.60; side:double;
+       shader:flat"></a-torus>
+      <a-torus radius="8."  radius-tubular="0.2" segments-tubular="130" segments-radial="12"
+      rotation="-90 0 0" material="src:#tex-satring; transparent:true; opacity:060; side:double;
+      shader:flat"></a-torus>
+      <a-torus radius="9.0"  radius-tubular="0.2" segments-tubular="130" segments-radial="16"
+      rotation="-90 0 0" material="src:#tex-satring; transparent:true; opacity:0.60; side:double; 
+       shader:flat"></a-torus>
+    <a-text value="SATURN" position="0 -5.5 0" align="center" color="#cce8ff" width="25" material="shader:flat"></a-text>
+  </a-entity>
+
+  <!-- ═══════ URANUS  orbit=130 ═══════ -->
+  <a-torus radius="130" radius-tubular="0.06" segments-tubular="200" rotation="-90 0 0"
+    material="color:#334477; opacity:0.35; transparent:true; shader:flat"></a-torus>
+  <a-sphere id="uranus" orbit="radius:130; speed:0.10"
+    radius="2.8"
+    material="src:#tex-uranus; roughness:0.8"
+    animation="property:rotation; to:0 360 0; loop:true; dur:6000; easing:linear">
+    <a-text value="URANUS" position="0 -3.8 0" align="center" color="#cce8ff" width="23" material="shader:flat"></a-text>
+  </a-sphere>
+
+  <!-- ═══════ NEPTUNE  orbit=152 ═══════ -->
+  <a-torus radius="152" radius-tubular="0.06" segments-tubular="220" rotation="-90 0 0"
+    material="color:#334477; opacity:0.35; transparent:true; shader:flat"></a-torus>
+  <a-sphere id="neptune" orbit="radius:152; speed:0.06"
+    radius="2.6"
+    material="src:#tex-neptune; roughness:0.8"
+    animation="property:rotation; to:0 360 0; loop:true; dur:6000; easing:linear">
+    <a-text value="NEPTUNE" position="0 -3.6 0" align="center" color="#cce8ff" width="25" material="shader:flat"></a-text>
+  </a-sphere>
+
+  <!-- ═══════ CAMERA — angled 3D view ═══════ -->
+  <a-entity id="rig" position="0 0 0">
+    <a-camera
+      id="cam"
+      position="0 40 100"
+      rotation="-25 0 0"
+      fov="60"
+      near="0.1" far="5000"
+      look-controls="enabled:true; reverseMouseDrag:false; touchEnabled:true"
+      wasd-controls="acceleration:100">
+    </a-camera>
+  </a-entity>
+
+</a-scene>
+
+<!-- ═══════════════════════════════════════════════
+     SPEED CONTROLS SCRIPT
+═══════════════════════════════════════════════ -->
+<script>
+  window.SMUL = {};
+
+  var bodies = [
+    { id:'mercury',     label:'MERCURY' },
+    { id:'venus',       label:'VENUS'   },
+    { id:'earth-group', label:'EARTH'   },
+    { id:'mars',        label:'MARS'    },
+    { id:'jupiter',     label:'JUPITER' },
+    { id:'saturn-group',label:'SATURN'  },
+    { id:'uranus',      label:'URANUS'  },
+    { id:'neptune',     label:'NEPTUNE' },
+    { id:'moon',        label:'MOON'    },
+  ];
+
+  var ctrl = document.getElementById('controls');
+  bodies.forEach(function(b) {
+    SMUL[b.id] = 1.0;
+    var row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML =
+      '<label>' + b.label + '</label>' +
+      '<input type="range" min="0" max="6" step="0.1" value="1" ' +
+      'oninput="SMUL[\'' + b.id + '\']=parseFloat(this.value)"/>';
+    ctrl.appendChild(row);
+  });
+
+  // Scroll to zoom (adjust camera height)
+  document.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    var cam = document.getElementById('cam');
+    if (!cam) return;
+    var pos = cam.getAttribute('position');
+    var y = pos.y + e.deltaY * 0.4;
+    y = Math.max(20, Math.min(700, y));
+    cam.setAttribute('position', pos.x + ' ' + y + ' ' + pos.z);
+  }, { passive: false });
+</script>
+
+</body>
+</html>
